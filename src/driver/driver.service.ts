@@ -23,4 +23,13 @@ export class DriverService {
     order['driver'] = assignedDriver;
     return this.orderRepository.save(order);
   }
+
+  generateReport() {
+    // Return a mock report for now
+    return {
+      totalOrders: 50,
+      totalDistance: 1200,
+      avgDeliveryTime: '2h 30m',
+    };
+  }
 }
