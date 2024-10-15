@@ -19,4 +19,15 @@ export class OrderService {
   findAll(): Promise<Order[]> {
     return this.orderRepository.find();
   }
+
+  async findAndSortOrders(): Promise<Order[]> {
+    const orders = await this.orderRepository.find();
+
+    return orders.sort((a, b) => {
+      if (a.priority === b.priority) {
+        return a.deliveryTime.getTime() - b.deliveryTime.getTime();
+      }
+      return b.priority - a.priority;
+    });
+  }
 }
