@@ -1,22 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderModule } from './order/order.module';
-import { DriverModule } from './driver/driver.module';
+import { DriverModule } from './driver/driver.module'; // Ensure this is imported
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: 'postgres', // or your chosen database type
       host: 'localhost',
       port: 5432,
       username: 'yourusername',
       password: 'yourpassword',
       database: 'order_management',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // In production, it's better to handle migrations manually
+      synchronize: true, // Remember to set this to false in production
     }),
     OrderModule,
-    DriverModule,
+    DriverModule, // Ensure DriverModule is included here
   ],
 })
 export class AppModule {}

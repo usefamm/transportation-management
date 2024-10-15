@@ -9,9 +9,9 @@ import { OrderService } from '../order/order.service';
 export class DriverService {
   constructor(
     @InjectRepository(Driver)
-    private driverRepository: Repository<Driver>,
+    private driverRepository: Repository<Driver>, // Correctly inject DriverRepository
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
+    private orderRepository: Repository<Order>, // Correctly inject OrderRepository
     private readonly orderService: OrderService,
   ) {}
 
