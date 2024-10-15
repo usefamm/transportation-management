@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Driver } from '../driver/driver.entity'; // Import the Driver entity
 
 @Entity()
 export class Order {
@@ -19,4 +20,7 @@ export class Order {
 
   @Column('decimal')
   cost: number;
+
+  @ManyToOne(() => Driver, (driver) => driver.orders, { nullable: true })
+  driver: Driver; // Add the relationship to Driver (nullable if the driver is assigned later)
 }
