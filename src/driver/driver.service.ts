@@ -88,33 +88,49 @@ export class DriverService {
 
   // Generate a report of driver performance
   async generateReport(): Promise<any[]> {
+    // Fetch all drivers
     const drivers = await this.driverRepository.find();
 
     const reports = await Promise.all(
       drivers.map(async (driver) => {
+        // Fetch orders for the specific driver
         const orders = await this.orderRepository.find({
-          where: { driver },
+          where: { driver: { driverId: driver.driverId } }, // Specify the driver by ID
         });
 
         const totalOrders = orders.length;
+
+        // Calculate total distance; ensure there's no weight-related null
         const totalDistance = orders.reduce(
-          (acc, order) => acc + order.weight * 0.5,
+          (acc, order) => acc + (order.weight || 0) * 0.5,
           0,
         ); // Example distance calculation
+
         const deliveryTimes = orders.map((order) =>
           order.deliveryTime.getTime(),
         );
+
         const avgDeliveryTime = this.getAverage(deliveryTimes);
-        const minDeliveryTime = Math.min(...deliveryTimes);
-        const maxDeliveryTime = Math.max(...deliveryTimes);
+        const minDeliveryTime = deliveryTimes.length
+          ? Math.min(...deliveryTimes)
+          : null; // Handle empty case
+        const maxDeliveryTime = deliveryTimes.length
+          ? Math.max(...deliveryTimes)
+          : null; // Handle empty case
 
         return {
           driverId: driver.driverId,
           totalOrders,
           totalDistance,
-          avgDeliveryTime: new Date(avgDeliveryTime).toISOString(),
-          minDeliveryTime: new Date(minDeliveryTime).toISOString(),
-          maxDeliveryTime: new Date(maxDeliveryTime).toISOString(),
+          avgDeliveryTime: avgDeliveryTime
+            ? new Date(avgDeliveryTime).toISOString()
+            : null,
+          minDeliveryTime: minDeliveryTime
+            ? new Date(minDeliveryTime).toISOString()
+            : null,
+          maxDeliveryTime: maxDeliveryTime
+            ? new Date(maxDeliveryTime).toISOString()
+            : null,
         };
       }),
     );
@@ -125,6 +141,6 @@ export class DriverService {
   // Utility function to calculate average time
   private getAverage(times: number[]): number {
     const sum = times.reduce((a, b) => a + b, 0);
-    return sum / times.length || 0; // Return 0 if no orders exist
+    return times.length ? sum / times.length : 0; // Return 0 if no orders exist
   }
 }
