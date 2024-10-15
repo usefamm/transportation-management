@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderModule } from './order/order.module';
 import { DriverModule } from './driver/driver.module';
-import { DriverModule } from './driver/driver.module';
 
 @Module({
   imports: [
