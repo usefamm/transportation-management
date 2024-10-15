@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Driver } from './driver.entity';
 import { Order } from '../order/order.entity';
+import { CreateDriverDto } from './dto/create-driver.dto';
 
 @Injectable()
 export class DriverService {
@@ -54,6 +55,12 @@ export class DriverService {
     selectedDriver.totalOrders += 1; // Increment the count of active orders for the driver
     await this.driverRepository.save(selectedDriver);
     return this.orderRepository.save(order);
+  }
+
+  // Method to create a new driver
+  async createDriver(createDriverDto: CreateDriverDto): Promise<Driver> {
+    const driver = this.driverRepository.create(createDriverDto); // Create a new driver instance
+    return this.driverRepository.save(driver); // Save the driver to the database
   }
 
   // Method to calculate distance between two locations

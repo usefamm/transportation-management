@@ -7,7 +7,7 @@ export class Order {
   orderId: number;
 
   @Column()
-  priority: number;
+  priority: number; // Ensure this is defined correctly
 
   @Column()
   deliveryTime: Date;
