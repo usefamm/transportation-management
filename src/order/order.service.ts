@@ -12,8 +12,11 @@ export class OrderService {
   ) {}
 
   // Create a new order
-  createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
+  async createOrder(createOrderDto: CreateOrderDto): Promise<Order> {
+    // Create a new Order entity instance based on the DTO
     const order = this.orderRepository.create(createOrderDto);
+
+    // Save the new order to the database
     return this.orderRepository.save(order);
   }
 

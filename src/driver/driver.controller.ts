@@ -11,9 +11,9 @@ export class DriverController {
     return this.driverService.assignDriver(orderId);
   }
 
-  // Generate a driver performance report
+  // Generate driver performance report
   @Get('report')
-  generateReport() {
+  async generateReport() {
     return this.driverService.generateReport();
   }
 }

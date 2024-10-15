@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Driver } from '../driver/driver.entity'; // Import the Driver entity
+import { Driver } from '../driver/driver.entity';
 
 @Entity()
 export class Order {
@@ -12,8 +12,8 @@ export class Order {
   @Column()
   deliveryTime: Date;
 
-  @Column()
-  location: string;
+  @Column('json') // Store location as latitude and longitude
+  location: { lat: number; lng: number };
 
   @Column()
   weight: number;
@@ -22,5 +22,5 @@ export class Order {
   cost: number;
 
   @ManyToOne(() => Driver, (driver) => driver.orders, { nullable: true })
-  driver: Driver; // Add the relationship to Driver (nullable if the driver is assigned later)
+  driver: Driver; // Relation to Driver
 }

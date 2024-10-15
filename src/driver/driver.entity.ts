@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Order } from '../order/order.entity'; // Adjust path if necessary
+import { Order } from '../order/order.entity'; // Import the Order entity
 
 @Entity()
 export class Driver {
@@ -15,6 +15,9 @@ export class Driver {
   @Column('decimal', { default: 0 })
   totalDistance: number;
 
+  @Column('json')
+  location: { lat: number; lng: number }; // Latitude and Longitude
+
   @OneToMany(() => Order, (order) => order.driver)
-  orders: Order[];
+  orders: Order[]; // Define a one-to-many relationship with Order
 }

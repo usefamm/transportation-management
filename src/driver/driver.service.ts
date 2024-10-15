@@ -1,57 +1,99 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Driver } from './driver.entity';
-import { Order } from '../order/order.entity';
-import { OrderService } from '../order/order.service';
+import { Driver } from './driver.entity'; // Import Driver entity
+import { Order } from '../order/order.entity'; // Import Order entity
 
 @Injectable()
 export class DriverService {
   constructor(
     @InjectRepository(Driver)
-    private driverRepository: Repository<Driver>, // Correctly inject DriverRepository
+    private driverRepository: Repository<Driver>, // Inject DriverRepository
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>, // Correctly inject OrderRepository
-    private readonly orderService: OrderService,
+    private orderRepository: Repository<Order>, // Inject OrderRepository
   ) {}
 
-  // Assign a driver to an order based on sorted orders
+  // Assign a driver to an order based on availability and criteria
   async assignDriver(orderId: number): Promise<Order> {
-    const sortedOrders = await this.orderService.findAndSortOrders();
+    const order = await this.orderRepository.findOne({
+      where: { orderId },
+      relations: ['driver'],
+    });
 
-    const order = sortedOrders.find((o) => o.orderId === orderId);
     if (!order) {
       throw new Error('Order not found');
     }
 
     const drivers = await this.driverRepository.find();
     if (!drivers.length) {
-      throw new Error('No drivers available');
+      throw new Error('No available drivers');
     }
 
-    const assignedDriver = drivers[0]; // Replace with actual driver assignment logic
+    const isDriverAvailable = (driver: Driver): boolean => {
+      return driver.totalOrders < 3; // Change this logic based on your requirements
+    };
 
-    order.driver = assignedDriver; // Assign driver to the order
+    const availableDrivers = drivers.filter(isDriverAvailable);
+    if (!availableDrivers.length) {
+      throw new Error('No available drivers that can take new orders');
+    }
+
+    const selectedDriver = availableDrivers.reduce((prev, curr) => {
+      const prevDistance = this.calculateDistance(
+        prev.location,
+        order.location,
+      );
+      const currDistance = this.calculateDistance(
+        curr.location,
+        order.location,
+      );
+      return prevDistance < currDistance ? prev : curr;
+    });
+
+    order.driver = selectedDriver;
+    selectedDriver.totalOrders += 1; // Increment the count of active orders for the driver
+    await this.driverRepository.save(selectedDriver);
     return this.orderRepository.save(order);
   }
 
-  // Generate a report on driver performance
-  async generateReport() {
+  // Method to calculate distance between two locations
+  private calculateDistance(
+    driverLocation: { lat: number; lng: number },
+    orderLocation: { lat: number; lng: number },
+  ): number {
+    const R = 6371; // Radius of the Earth in km
+    const dLat = this.degreesToRadians(orderLocation.lat - driverLocation.lat);
+    const dLon = this.degreesToRadians(orderLocation.lng - driverLocation.lng);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.degreesToRadians(driverLocation.lat)) *
+        Math.cos(this.degreesToRadians(orderLocation.lat)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in kilometers
+  }
+
+  // Helper method to convert degrees to radians
+  private degreesToRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
+  // Generate a report of driver performance
+  async generateReport(): Promise<any[]> {
     const drivers = await this.driverRepository.find();
 
     const reports = await Promise.all(
       drivers.map(async (driver) => {
-        // Fetch all orders assigned to this driver
         const orders = await this.orderRepository.find({
-          where: { driver: driver }, // Filter orders by driver
+          where: { driver },
         });
 
         const totalOrders = orders.length;
         const totalDistance = orders.reduce(
           (acc, order) => acc + order.weight * 0.5,
           0,
-        );
-
+        ); // Example distance calculation
         const deliveryTimes = orders.map((order) =>
           order.deliveryTime.getTime(),
         );
@@ -73,9 +115,9 @@ export class DriverService {
     return reports;
   }
 
-  // Utility function to calculate average
+  // Utility function to calculate average time
   private getAverage(times: number[]): number {
     const sum = times.reduce((a, b) => a + b, 0);
-    return sum / times.length;
+    return sum / times.length || 0; // Return 0 if no orders exist
   }
 }
