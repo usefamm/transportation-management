@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Driver } from './driver.entity'; // Import Driver entity
-import { Order } from '../order/order.entity'; // Import Order entity
+import { Driver } from './driver.entity';
+import { Order } from '../order/order.entity';
 
 @Injectable()
 export class DriverService {
   constructor(
     @InjectRepository(Driver)
-    private driverRepository: Repository<Driver>, // Inject DriverRepository
+    private driverRepository: Repository<Driver>,
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>, // Inject OrderRepository
+    private orderRepository: Repository<Order>,
   ) {}
 
   // Assign a driver to an order based on availability and criteria
@@ -30,7 +30,7 @@ export class DriverService {
     }
 
     const isDriverAvailable = (driver: Driver): boolean => {
-      return driver.totalOrders < 3; // Change this logic based on your requirements
+      return driver.totalOrders < 3;
     };
 
     const availableDrivers = drivers.filter(isDriverAvailable);
