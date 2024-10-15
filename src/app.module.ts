@@ -9,7 +9,7 @@ import { DriverModule } from './driver/driver.module';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      username: 'yourusername',
+      username: 'postgres',
       password: 'yourpassword',
       database: 'order_management',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],

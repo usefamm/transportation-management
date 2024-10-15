@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Driver } from './driver.entity';
 import { DriverService } from './driver.service';
 import { DriverController } from './driver.controller';
-import { Order } from '../order/order.entity'; 
+import { Order } from '../order/order.entity';
 import { OrderModule } from 'src/order/order.module';
 
 @Module({
